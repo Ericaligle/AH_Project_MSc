@@ -130,6 +130,7 @@ Uma análise preliminar via df.info() revelou a heterogeneidade do dataset. A co
 ### **2. Estatísticas Resumo (Summary Statistics)**
 
 **Variáveis Numéricas**
+
 Para os atributos quantitativos, focamos na dispersão e tendência central. Notamos uma grande variabilidade em medidas de área, sugerindo um mercado imobiliário heterogêneo.
 
 | Variável    | Média     | Desvio Padrão | Mín    | Máx   |
@@ -140,6 +141,7 @@ Para os atributos quantitativos, focamos na dispersão e tendência central. Not
 A tabela completa pode ser visualizada em: `reports\data_dictionary_numeric.md`
 
 **Variáveis Categóricas**
+
 Para os atributos qualitativos, analisamos a frequência e a dominância de certas categorias. Isso nos ajuda a entender o "perfil padrão" das casas em Ames.
 
 | Variável     | Categ. Únicas | Top (Moda) | Freq. da Moda | % de Dominância |
