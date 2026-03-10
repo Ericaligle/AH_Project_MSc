@@ -52,7 +52,7 @@ Para garantir que o projeto execute corretamente em qualquer máquina, siga os p
 Primeiro, baixe o projeto para a sua máquina local:
 
 ```
-git clone https://github.com/seu-usuario/Ames_Housing_Project.git
+git clone https://github.com/Ericaligle/AH_Project_MSc.git
 cd Ames_Housing_Project
 ``` 
 **2. Configurar o Ambiente Virtual**
