@@ -48,14 +48,14 @@ Ames_Housing_Project/
 ## 🛠️ Configuração do Ambiente e Reprodutibilidade
 Para garantir que o projeto execute corretamente em qualquer máquina, siga os passos abaixo. Estas instruções assumem que você já possui o Python 3.x instalado.
 
-**1. Clonar o Repositório**
+### **1. Clonar o Repositório**
 Primeiro, baixe o projeto para a sua máquina local:
 
 ```
 git clone https://github.com/Ericaligle/AH_Project_MSc.git
 cd Ames_Housing_Project
 ``` 
-**2. Configurar o Ambiente Virtual**
+### **2. Configurar o Ambiente Virtual**
 
 Recomenda-se o uso de um ambiente isolado para evitar conflitos de versões entre bibliotecas:
 
@@ -75,7 +75,7 @@ source .venv/bin/activate
 (Ao ativar, você deverá ver o prefixo (.venv) no seu terminal).
 
 
-**3. Instalar Dependências**
+### **3. Instalar Dependências**
 
 Com o ambiente ativo, instale todas as bibliotecas necessárias listadas no arquivo requirements.txt:
 
