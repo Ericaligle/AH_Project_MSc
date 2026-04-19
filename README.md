@@ -1,7 +1,7 @@
 # Ames Housing Project: Pipeline de Análise Preditiva
 Estruturação de Workflow e Modelagem de Dados Imobiliários
 
-## 📖 Visão Geral e Objetivos
+## Visão Geral e Objetivos
 Este repositório implementa um pipeline end-to-end de Ciência de Dados aplicado ao mercado imobiliário de Ames (Iowa). Mais do que buscar a performance isolada de um algoritmo, este projeto prioriza o desenvolvimento de uma arquitetura de software robusta e reprodutível, garantindo a integridade de cada etapa analítica, do dado bruto ao insight final.
 
 A abordagem aqui é baseada na governança dos dados: transformar informações complexas em um fluxo modularizado e bem documentado, capaz de sustentar investigações profundas sobre os determinantes de valor das propriedades residenciais e fornecer uma base sólida para modelos de regressão avançada.
@@ -13,7 +13,7 @@ A abordagem aqui é baseada na governança dos dados: transformar informações 
 
 **Documentação Técnica**: Assegurar que o experimento seja 100% replicável através de um ambiente virtual isolado e gestão transparente de dependências.
 
-## 🏗️ Estrutura do Projeto (Scaffolding)
+## Estrutura do Projeto (Scaffolding)
 A organização do diretório foi planejada para separar as etapas de processamento e proteger a integridade dos dados originais:
 
 `data/raw/` : Armazena o dataset original e imutável.
@@ -45,7 +45,7 @@ Ames_Housing_Project/
 ```
 
 
-## 🛠️ Configuração do Ambiente e Reprodutibilidade
+## Configuração do Ambiente e Reprodutibilidade
 Para garantir que o projeto execute corretamente em qualquer máquina, siga os passos abaixo. Estas instruções assumem que você já possui o Python 3.x instalado.
 
 ### **1. Clonar o Repositório**
@@ -83,7 +83,7 @@ Com o ambiente ativo, instale todas as bibliotecas necessárias listadas no arqu
 pip install -r requirements.txt
 ```
 
-## 📊 Fonte e Estrutura dos Dados (Data Source & Structure)
+## Fonte e Estrutura dos Dados (Data Source & Structure)
 A base de dados utilizada neste projeto é o Ames Housing Dataset, um conjunto de dados amplamente reconhecido na comunidade de Ciência de Dados por sua riqueza de detalhes e complexidade estatística.
 
 ### **Origem e Contexto**
@@ -114,9 +114,8 @@ As variáveis fornecem um detalhamento granular da propriedade, abrangendo:
 
 * **Localização**: Zoneamento urbano e identificação de bairros específicos.
 
-_Nota de Contexto: Esta riqueza de variáveis permite uma investigação profunda sobre a multicolinearidade (como a relação entre o ano de construção e a qualidade dos materiais) e o impacto de fatores externos no preço final dos imóveis._
 
-## 🔍 Inspeção Inicial dos Dados (Initial Data Inspection)
+## Inspeção Inicial dos Dados (Initial Data Inspection)
 
 Esta etapa documenta o primeiro contato com o dataset, onde realizamos um diagnóstico de saúde dos dados para orientar as estratégias de limpeza e modelagem.
 
@@ -162,10 +161,268 @@ A inspeção revelou que o dataset de Ames possui um volume significativo de val
 * **Lacunas de Dados**: Variáveis como `Lot Frontage` (~16% missing) sugerem a necessidade de técnicas de imputação (como o uso da mediana da vizinhança).
 
 
-### **4. Padrões e Irregularidades (Notable Patterns)**
+---
 
-Durante a análise exploratória (EDA), observamos comportamentos que exigem atenção especial:
+## 9. Padrões e Irregularidades (Notable Patterns)
 
-**Assimetria (Skewness)**: A variável alvo `SalePrice` apresenta uma distribuição assimétrica à direita, o que pode exigir uma transformação logarítmica para normalização.
+Durante a análise exploratória (EDA) e estatística, foram observados comportamentos que exigiram intervenções estratégicas no pipeline de dados.
 
-**Outliers**: Identificamos imóveis com metragens extremamente altas (`Gr Liv Area` > 4000 ft²) que não acompanham o crescimento proporcional do preço, agindo como pontos fora da curva.
+### Assimetria (Skewness) e Normalização
+A variável alvo `SalePrice` e a variável preditora `Lot Area` apresentaram distribuições assimétricas à direita.
+
+**Ação:**
+- Aplicação de transformações logarítmicas:
+  - `log(SalePrice)`
+  - `log(Lot Area)`
+
+**Resultado:**
+- Distribuições mais próximas da normalidade  
+- Redução do impacto de valores extremos  
+- Estabilização da variância dos resíduos  
+- Coeficientes de regressão mais confiáveis  
+
+---
+
+### Outliers Críticos
+Foram identificados imóveis com área extremamente elevada:
+
+- `Gr Liv Area > 4000 ft²`  
+- Preços desproporcionais  
+
+**Ação:**
+- Isolamento ou tratamento desses pontos  
+
+**Justificativa:**
+- Evitar distorções na linha de tendência  
+- Representam transações atípicas no mercado de Ames  
+
+---
+
+### Multicolinearidade de Áreas
+A análise de correlação revelou redundâncias severas entre atributos de área.
+
+**Exemplo:**
+- `1st Flr SF`
+- `Total Bsmt SF` (correlação > 0.80)
+
+**Ação:**
+- Priorização de variáveis agregadas de área habitável  
+
+**Objetivo:**
+- Reduzir inflação de variância (VIF alto)  
+- Melhorar estabilidade dos coeficientes  
+
+---
+
+### Determinantes de Qualidade
+A variável `Overall Qual` foi identificada como o preditor mais forte do dataset.
+
+**Observação:**
+- `Kitchen Qual` apresentou alta colinearidade com `Overall Qual`  
+
+**Insight:**
+- O padrão de acabamento tende a ser uniforme na residência  
+
+**Impacto:**
+- Possibilidade de simplificação do modelo  
+- Redução de redundância sem perda significativa de acurácia  
+
+---
+
+### Variância Insuficiente
+A variável `Heating` apresentou concentração extrema:
+
+- ~99% na categoria `GasA`
+
+**Ação:**
+- Remoção do modelo  
+
+**Justificativa:**
+- Baixo poder discriminativo  
+- Ausência de sinal estatístico relevante  
+
+---
+
+### Associações Espúrias (Pool QC)
+A variável `Pool QC` apresentou baixa representatividade:
+
+- Apenas 13 imóveis com piscina  
+
+**Problema:**
+- Geração de correlações artificiais  
+
+**Ação:**
+- Conversão para variável binária: `has_pool`  
+
+**Resultado:**
+- Redução de ruído  
+- Representação mais robusta da característica 
+
+📊 Resumo Executivo (Executive Summary)
+
+- **Principal Insight:**  
+  A variável `Overall Qual` (Qualidade Geral) é o principal driver de valor. Imóveis com acabamento superior superam propriedades maiores com acabamento médio.
+
+- **Regressão (Modelo L6):**  
+  - RMSE: **43,882.48**  
+  - MAE: **28,628.46**  
+  → Modelo capaz de estimar preços com boa precisão, considerando a variabilidade do mercado.
+
+- **Classificação (Modelo G5):**  
+  - Acurácia: **69.55%**  
+  - F1-Score: **0.6929**  
+  - ROC AUC: **0.8465**  
+  → Boa capacidade de segmentação entre imóveis de baixo, médio e alto padrão.
+
+- **Diferencial Técnico:**  
+  Uso de transformações logarítmicas e controle de multicolinearidade, garantindo modelos **interpretáveis e estatisticamente robustos**.
+
+---
+
+## 🧱 Estrutura do Pipeline
+
+O projeto é modularizado em etapas para garantir reprodutibilidade e clareza analítica:
+
+1. **Auditoria de Dados** (`1.Missing_analisys.ipynb`)  
+   - Tratamento de 2.930 observações  
+   - Imputação lógica para ausência estrutural (garagem, porão, etc.)  
+   - Correções pontuais com uso de proxy  
+
+2. **Filtragem de Sinal** (`2.Univariate_analisys.ipynb`)  
+   - Remoção de variáveis com baixa variância (ex: `Heating`)  
+   - Identificação e controle de outliers (`Gr Liv Area > 4000`)  
+
+3. **Engenharia de Atributos** (`3.Correlation_analisys.ipynb`)  
+   - Identificação de multicolinearidade  
+   - Conversão de variáveis ordinais (escala 1–5)  
+
+4. **Processamento** (`4.Processing.ipynb`)  
+   - Pipeline com `StandardScaler`, `OneHotEncoder`  
+   - Transformações logarítmicas (`log(SalePrice)`, `log(Lot Area)`)  
+
+5. **Modelagem e Validação** (`5.Modeling.ipynb`)  
+   - Treinamento de modelos  
+   - Avaliação em conjunto de teste independente  
+
+---
+
+## 🤖 Modelagem Preditiva
+
+### 📈 Regressão (Estimativa de Preço)
+
+Modelos desenvolvidos: **L1 a L6**
+
+- **L1–L2:** Baselines (área e idade)  
+- **L3–L5:** Inclusão de infraestrutura (banheiros, lareiras)  
+- **L6 (Final):**
+  - `Overall Qual`
+  - `Gr Liv Area`
+  - `log(Lot Area)`
+  - Estado de conservação  
+
+→ Melhor equilíbrio entre simplicidade, interpretabilidade e desempenho.
+
+---
+
+### 🏷️ Classificação (Segmentação de Mercado)
+
+Modelos desenvolvidos: **G1 a G5**
+
+- **G1–G2:** Variáveis básicas (área, garagem)  
+- **G3–G4:** Inclusão de qualidade e idade  
+- **G5 (Final):**
+  - Variáveis estruturais + qualidade + área do lote  
+  - Melhor desempenho no conjunto de teste  
+
+→ Modelo robusto para segmentação de mercado imobiliário.
+
+---
+
+## 📊 Resultados e Métricas
+
+Performance avaliada em conjunto de teste (dados não vistos):
+
+| Tarefa         | Modelo | Métrica   | Resultado |
+|---------------|--------|----------|----------|
+| Regressão     | L6     | RMSE     | 43,882.48 |
+| Regressão     | L6     | MAE      | 28,628.46 |
+| Classificação | G5     | Acurácia | 0.6955 |
+| Classificação | G5     | F1-Score | 0.6929 |
+| Classificação | G5     | ROC AUC  | 0.8465 |
+
+---
+
+## 📈 Interpretação dos Resultados
+
+### Regressão (L6)
+- Erro médio de aproximadamente **$28 mil**
+- Sensível a imóveis de alto valor (outliers)
+- Boa captura da tendência geral de preços  
+
+### Classificação (G5)
+- Acurácia próxima de **70%**, adequada para segmentação  
+- F1-score equilibrado entre precisão e recall  
+- ROC AUC indica **boa separação entre classes**  
+
+---
+
+## 🔍 Padrões e Irregularidades (Notable Patterns)
+
+### Assimetria (Skewness)
+- Aplicação de:
+  - `log(SalePrice)`
+  - `log(Lot Area)`  
+
+→ Redução de outliers e melhor ajuste aos modelos lineares  
+
+---
+
+### Multicolinearidade
+- Correlação > 0.80 entre:
+  - `1st Flr SF`
+  - `Total Bsmt SF`  
+
+→ Uso de variáveis agregadas para evitar inflação de variância  
+
+---
+
+### Redundância de Qualidade
+- `Kitchen Qual` torna-se redundante com `Overall Qual`  
+
+→ Permite simplificação do modelo sem perda relevante  
+
+---
+
+## 💡 Insights de Negócio
+
+- **Qualidade > Tamanho:**  
+  Melhorar acabamento gera mais valor do que aumentar área  
+
+- **Segmentação de Mercado:**  
+  Área do lote ajuda a distinguir imóveis de alto padrão  
+
+- **Eficiência Operacional:**  
+  Poucas variáveis explicam grande parte do preço  
+  → Redução de custo em futuras coletas  
+
+---
+
+## ⚠️ Limitações e Próximos Passos
+
+### Limitações
+- Modelo específico para Ames (Iowa)  
+- Não considera fatores macroeconômicos  
+
+### Roadmap
+- Testar modelos não-lineares (Random Forest, XGBoost)  
+- Implementar API para previsão de preços  
+- Melhorar validação com cross-validation  
+
+---
+
+## 🛠️ Tecnologias e Stack
+
+- **Linguagem:** Python 3.x  
+- **Análise:** Pandas, NumPy, Scipy  
+- **Modelagem:** Statsmodels, Scikit-learn  
+- **Visualização:** Matplotlib, Seaborn  
